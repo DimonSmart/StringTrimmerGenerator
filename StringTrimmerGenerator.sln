@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DimonSmart.StringTrimmerGenerator", "StringTrimmerGenerator\DimonSmart.StringTrimmerGenerator.csproj", "{AAD25830-12FA-4DF3-8782-A8CF5C5B6E13}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DimonSmart.StringTrimmerGeneratorDemo", "StringTrimmerGeneratorDemo\DimonSmart.StringTrimmerGeneratorDemo.csproj", "{13957FBC-56A3-47FD-8F44-7962B6A3A05C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAD25830-12FA-4DF3-8782-A8CF5C5B6E13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAD25830-12FA-4DF3-8782-A8CF5C5B6E13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAD25830-12FA-4DF3-8782-A8CF5C5B6E13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAD25830-12FA-4DF3-8782-A8CF5C5B6E13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13957FBC-56A3-47FD-8F44-7962B6A3A05C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13957FBC-56A3-47FD-8F44-7962B6A3A05C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13957FBC-56A3-47FD-8F44-7962B6A3A05C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13957FBC-56A3-47FD-8F44-7962B6A3A05C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B448FD4D-08E9-4690-8BFA-62ABCDADDCD1}
+	EndGlobalSection
+EndGlobal
