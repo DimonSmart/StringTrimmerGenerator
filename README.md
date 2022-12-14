@@ -1,14 +1,11 @@
 🚧 Work In Progress 
 ========
 
-I'd love to have a fast and simple way to sanitize user input such as trimming spaces at the begining and at the end of strings. Additionaly I'd love to remove space sequences inside the string (optionally)
-StringTrimmer package do it perfectly with only one limitation - speed. As it uses reflection it is not as fast as possible, so many users prefer to sanitize user input manually or even not sanitize it at all.
-As a result multiple users with "same" user names and email addresses with only space difference. And as result "duplicate" users with inconsistent rights, database polluted with duplicate records, as a result
-codebase polluted with trim and distinct function everywhere. As a result total performance degradation, developers demotivation and many other troubles.
+I'd love to have a quick and easy way to clean up user input, such cutting whitespace from the beginning and end of strings. In addition, I'd like to remove space sequences from within strings (optionally). The StringTrimmer software does this flawlessly with just one speed restriction. Many users choose to manually sanitize user input or perhaps not to sanitize it at all because reflection slows it down. As a result, numerous people have email addresses and user names that are nearly identical. And as a result, there are "duplicate" users with inconsistent access privileges, duplicate records in the database, and trim and distinct functions all over the place in the codebase. Deterioration of overall performance, demotivation of developers, and several other issues are the outcome.
 
-I'd love to share simple solution for solve many problems in the earlies stage.
+I'd want to provide some quick fixes for common early-stage issues.
 
-Trim all strings in a class with only one function call!
+With a single function call, you can trim every string in a class.
  
 For more infomation on the Source Generators feature, see the [design document](https://github.com/dotnet/roslyn/blob/main/docs/features/source-generators.md).
 
