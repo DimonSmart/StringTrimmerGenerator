@@ -7,11 +7,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DimonSmart.StringTrimmerGenerator
 {
-    class StringTrimmerGeneratorContextReceiver : ISyntaxContextReceiver
+    public class StringTrimmerGeneratorContextReceiver : ISyntaxContextReceiver
     {
         public class PropertyTrimDescriptor
         {
             public string PropertyName { get; set; }
+            public string PropertyType { get; set; }
             public TrimType TrimType { get; set; }
         }
 
@@ -24,64 +25,110 @@ namespace DimonSmart.StringTrimmerGenerator
         }
 
         public Dictionary<string, ClassDescriptor> MyProperties = new();
-        public List<Diagnostic> Diagnostics = new List<Diagnostic>();
+        public List<Diagnostic> Diagnostics = new();
         private ClassDeclarationSyntax CurrentClass = null;
+        private const string GenerateStringTrimmerAttributeFullName = "DimonSmart.StringTrimmer.GenerateStringTrimmerAttribute";
 
-        /// <summary>
-        /// Called for every syntax node in the compilation, we can inspect the nodes and save any information useful for generation
-        /// </summary>
         public void OnVisitSyntaxNode(GeneratorSyntaxContext syntaxNode)
         {
-            if (syntaxNode.Node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclarationSyntax)
+            if (syntaxNode.Node is ClassDeclarationSyntax classDeclarationSyntax)
             {
-                if (!Debugger.IsAttached)
-                {
-                    Debugger.Launch();
-                }
-                CurrentClass = classDeclarationSyntax;
+                VisitClassDeclarationSyntax(syntaxNode, classDeclarationSyntax);
                 return;
             }
 
-            if (syntaxNode.Node is PropertyDeclarationSyntax propertyDeclarationSyntax)
+            if (CurrentClass != null && syntaxNode.Node is PropertyDeclarationSyntax propertyDeclarationSyntax)
             {
-                var className = CurrentClass.Identifier.ValueText;
-                var fullClassName = GetFullClassName(CurrentClass);
-                var propertyName = propertyDeclarationSyntax.Identifier.ValueText;
+                VisitPropertyDeclarationSyntax(syntaxNode, propertyDeclarationSyntax);
+                return;
+            }
+        }
 
-                var propertyAccessibility = syntaxNode.SemanticModel.GetDeclaredSymbol(propertyDeclarationSyntax).DeclaredAccessibility;
+        private void VisitPropertyDeclarationSyntax(GeneratorSyntaxContext syntaxNode, PropertyDeclarationSyntax propertyDeclarationSyntax)
+        {
+            if (CurrentClass == null)
+            {
+                return;
+            }
 
-                // Skip for non public properties
-                if (propertyAccessibility != Accessibility.Public)
+            var className = CurrentClass.Identifier.ValueText;
+            var fullClassName = GetFullClassName(CurrentClass);
+            var propertyName = propertyDeclarationSyntax.Identifier.ValueText;
+            var propertyType = syntaxNode
+                .SemanticModel
+                .GetDeclaredSymbol(propertyDeclarationSyntax)
+                .Type.ToDisplayString();
+            var propertyAccessibility = syntaxNode
+                .SemanticModel
+                .GetDeclaredSymbol(propertyDeclarationSyntax)
+                .DeclaredAccessibility;
+
+            // Skip for non public properties
+            if (propertyAccessibility != Accessibility.Public)
+            {
+                ReportPrivateField(className, propertyName);
+                return;
+            }
+
+            if (syntaxNode.SemanticModel.GetDeclaredSymbol(propertyDeclarationSyntax) is IPropertySymbol propertySymbol)
+            {
+                if (propertySymbol.IsWriteOnly || propertySymbol.IsReadOnly)
                 {
-                    ReportPrivateField(className, propertyName);
                     return;
                 }
-
-                if (syntaxNode.SemanticModel.GetDeclaredSymbol(propertyDeclarationSyntax) is IPropertySymbol propertySymbol)
-                {
-                    if (propertySymbol.IsWriteOnly || propertySymbol.IsReadOnly)
-                    {
-                        return;
-                    }
-                }
-
-
-                var propertyDescriptor = new PropertyTrimDescriptor { PropertyName = propertyName, TrimType = TrimType.All };
-
-                if (MyProperties.TryGetValue(className, out var targetClass))
-                {
-                    targetClass.Properties.Add(propertyDescriptor);
-                }
-                else
-                {
-                    MyProperties.Add(className, new ClassDescriptor
-                    {
-                        ClassName = className,
-                        FullClassName = fullClassName,
-                        Properties = new List<PropertyTrimDescriptor> { propertyDescriptor }
-                    });
-                }
             }
+
+            var propertyDescriptor = new PropertyTrimDescriptor
+            {
+                PropertyName = propertyName,
+                PropertyType = propertyType,
+                TrimType = TrimType.All
+            };
+
+            if (MyProperties.TryGetValue(fullClassName, out var targetClass))
+            {
+                targetClass.Properties.Add(propertyDescriptor);
+            }
+            else
+            {
+                MyProperties.Add(fullClassName, new ClassDescriptor
+                {
+                    ClassName = className,
+                    FullClassName = fullClassName,
+                    Properties = new List<PropertyTrimDescriptor> { propertyDescriptor }
+                });
+            }
+        }
+
+        private void VisitClassDeclarationSyntax(GeneratorSyntaxContext syntaxNode, ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            var generateStringTrimmerAttribute = syntaxNode
+                .SemanticModel
+                .Compilation
+                //.GetTypeByMetadataName(typeof(GenerateStringTrimmerAttribute).FullName);
+                .GetTypeByMetadataName("DimonSmart.StringTrimmer.GenerateStringTrimmerAttribute");
+
+
+            CurrentClass = classDeclarationSyntax;
+
+            var markerAttributes =
+               syntaxNode
+               .SemanticModel
+               .GetDeclaredSymbol(classDeclarationSyntax)
+               .GetAttributes()
+               .Where(i => i.AttributeClass.OriginalDefinition.ToDisplayString() == GenerateStringTrimmerAttributeFullName)
+               .ToList();
+
+            if (markerAttributes.Any())
+            {
+                CurrentClass = classDeclarationSyntax;
+            }
+            else
+            {
+                CurrentClass = null;
+            }
+
+            return;
         }
 
         private void ReportPrivateField(string className, string propertyName)
@@ -95,7 +142,7 @@ namespace DimonSmart.StringTrimmerGenerator
             isEnabledByDefault: true), Location.None, className, propertyName));
         }
 
-        public static string GetFullClassName(ClassDeclarationSyntax varClassDec)
+        private static string GetFullClassName(ClassDeclarationSyntax varClassDec)
         {
             SyntaxNode tempCurCls = varClassDec;
             var tempFullName = new Stack<string>();
@@ -117,5 +164,4 @@ namespace DimonSmart.StringTrimmerGenerator
             return string.Join(".", tempFullName);
         }
     }
-
 }

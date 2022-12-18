@@ -8,11 +8,9 @@
 
 
             // DimonSmart.StringTrimmerGeneratorDemo.StringTrimmerExampleModel_StringTrimmerExtension.Tirm(model);
-             model.Trim();
+            model.Trim();
         }
     }
 }
-
-
 
 

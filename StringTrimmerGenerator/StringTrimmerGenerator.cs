@@ -1,5 +1,10 @@
-﻿using System.Text;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace DimonSmart.StringTrimmerGenerator
@@ -9,6 +14,7 @@ namespace DimonSmart.StringTrimmerGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
+
             // Register the attribute source
             context.RegisterForPostInitialization((i) =>
             {
@@ -30,20 +36,33 @@ namespace DimonSmart.StringTrimmerGenerator
                 context.ReportDiagnostic(diagnostic);
             }
 
+            //if (!Debugger.IsAttached)
+            //{
+            //    Debugger.Launch();
+            //}
+
+            var classesToTrim = receiver.MyProperties.Keys.ToArray();
+
             var sb = new StringBuilder();
 
             foreach (var cls in receiver.MyProperties.Keys)
             {
+                var classDescriptor = receiver.MyProperties[cls];
                 sb.AppendLine($"namespace {receiver.MyProperties[cls].NameSpace}");
                 sb.AppendLine(@"{");
 
-                sb.AppendLine($"public static class {cls}_StringTrimmerExtension");
+                sb.AppendLine($"public static class {classDescriptor.ClassName}_StringTrimmerExtension");
                 sb.AppendLine(@"{");
 
-                sb.AppendLine($"  public static {cls} Trim(this {cls} classToTrim)");
+                sb.AppendLine($"  public static {classDescriptor.ClassName} Trim(this {classDescriptor.ClassName} classToTrim)");
                 sb.AppendLine("  {");
                 foreach (var prop in receiver.MyProperties[cls].Properties)
                 {
+                    if (prop.PropertyType != "string" && !classesToTrim.Contains(prop.PropertyType))
+                    {
+                        continue;
+                    }
+
                     // TODO: Handle options
                     sb.AppendLine($"    classToTrim.{prop.PropertyName} = classToTrim.{prop.PropertyName}.Trim();");
                 }
