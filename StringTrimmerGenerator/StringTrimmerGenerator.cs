@@ -1,10 +1,7 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace DimonSmart.StringTrimmerGenerator
@@ -14,15 +11,12 @@ namespace DimonSmart.StringTrimmerGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-
-            // Register the attribute source
             context.RegisterForPostInitialization((i) =>
             {
                 i.AddSource("GenerateStringTrimmerAttribute.g.cs", GenerateStringTrimmerAttributeText);
                 i.AddSource("StringTrimmerExtensionClass.g.cs", StringTrimmerExtensionClassText);
             });
 
-            // Register a syntax receiver that will be created for each generation pass
             context.RegisterForSyntaxNotifications(() => new StringTrimmerGeneratorContextReceiver());
         }
 
