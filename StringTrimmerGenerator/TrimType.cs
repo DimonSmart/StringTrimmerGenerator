@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DimonSmart.StringTrimmerGenerator
+namespace DimonSmart.StringTrimmer
 {
     [Flags]
     public enum TrimType

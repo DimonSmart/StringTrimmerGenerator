@@ -5,10 +5,10 @@ namespace DimonSmart.StringTrimmerGeneratorDemo
     [GenerateStringTrimmer]
     public class StringTrimmerExampleModel
     {
-        public string Name { get; set; } = " A ";
-        public string Surname { get; set; } = " B ";
-        private string PrivateProperty { get; set; } = " C ";
-        //  public string PrivateSetterProperty { get; private set; }
+        public string PublicName { get; set; } = " A ";
+        internal string InternalName { get; set; } = " AI ";
+        private string PrivateName { get; set; } = " C ";
+        public string PublicNamePrivateSetter { get; private set; }
 
         public SubClass Sub { get; set; } = new SubClass();
     }
@@ -18,8 +18,6 @@ namespace DimonSmart.StringTrimmerGeneratorDemo
     {
         public string S1 { get; set; } = " S ";
     }
-
-
 }
 
 

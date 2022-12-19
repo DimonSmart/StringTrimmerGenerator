@@ -11,6 +11,11 @@ namespace DimonSmart.StringTrimmerGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
+            //    if (!Debugger.IsAttached)
+            //    {
+            //        Debugger.Launch();
+            //    }
+
             context.RegisterForPostInitialization((i) =>
             {
                 i.AddSource("GenerateStringTrimmerAttribute.g.cs", GenerateStringTrimmerAttributeText);
@@ -29,11 +34,6 @@ namespace DimonSmart.StringTrimmerGenerator
             {
                 context.ReportDiagnostic(diagnostic);
             }
-
-            //if (!Debugger.IsAttached)
-            //{
-            //    Debugger.Launch();
-            //}
 
             var classesToTrim = receiver.MyProperties.Keys.ToArray();
 
@@ -67,7 +67,7 @@ namespace DimonSmart.StringTrimmerGenerator
                 sb.AppendLine("}");
             }
 
-            context.AddSource("StringTrimmerExtension.cs", SourceText.From(sb.ToString(), Encoding.UTF8, SourceHashAlgorithm.Sha256));
+            context.AddSource("StringTrimmerExtension.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8, SourceHashAlgorithm.Sha256));
         }
 
         public const string StringTrimmerExtensionClassText = @"
@@ -116,14 +116,27 @@ public static class StringTrimmerExtension
 using System;
 namespace DimonSmart.StringTrimmer
 {
+    [Flags]
+    public enum TrimType
+    {
+        None,
+        Left = 1,
+        Right = 2,
+        LeftAndRignt = Left | Right,
+        Seq = 4,
+        All = LeftAndRignt | Seq,
+    }
+
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     [System.Diagnostics.Conditional(""StringTrimmerGenerator_DEBUG"")]
     sealed class GenerateStringTrimmerAttribute : Attribute
-    {
-        public GenerateStringTrimmerAttribute()
-        {
-        }
-    }
+{
+	TrimType _trimType;
+	public GenerateStringTrimmerAttribute(TrimType trimType = TrimType.All)
+	{
+		_trimType = trimType;
+	}
+}
 }
 ";
     }

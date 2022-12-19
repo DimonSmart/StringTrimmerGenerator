@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using DimonSmart.StringTrimmer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -62,8 +65,7 @@ namespace DimonSmart.StringTrimmerGenerator
                 .GetDeclaredSymbol(propertyDeclarationSyntax)
                 .DeclaredAccessibility;
 
-            // Skip for non public properties
-            if (propertyAccessibility != Accessibility.Public)
+            if (propertyAccessibility != Accessibility.Public && propertyAccessibility != Accessibility.Internal)
             {
                 ReportPrivateField(className, propertyName);
                 return;
@@ -73,6 +75,18 @@ namespace DimonSmart.StringTrimmerGenerator
             {
                 if (propertySymbol.IsWriteOnly || propertySymbol.IsReadOnly)
                 {
+                    return;
+                }
+
+                if ((propertySymbol.GetMethod.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
+                {
+                    ReportUnaccessibleMethod(className, propertyName, "get", propertySymbol.GetMethod.DeclaredAccessibility);
+                    return;
+                }
+
+                if ((propertySymbol.SetMethod.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
+                {
+                    ReportUnaccessibleMethod(className, propertyName, "set", propertySymbol.SetMethod.DeclaredAccessibility);
                     return;
                 }
             }
@@ -97,6 +111,17 @@ namespace DimonSmart.StringTrimmerGenerator
                     Properties = new List<PropertyTrimDescriptor> { propertyDescriptor }
                 });
             }
+        }
+
+        private void ReportUnaccessibleMethod(string className, string propertyName, string methodName, Accessibility accessibility)
+        {
+            Diagnostics.Add(Diagnostic.Create(new DiagnosticDescriptor(
+            id: "TRIMMER002",
+            title: "Class property isn't fully accessible",
+            messageFormat: "Class '{0}' has unaccessible property '{1}' with '{2}' accessibility as '3'",
+            category: "StringTrimmerGenerator",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true), Location.None, className, propertyName, methodName, accessibility.ToString()));
         }
 
         private void VisitClassDeclarationSyntax(GeneratorSyntaxContext syntaxNode, ClassDeclarationSyntax classDeclarationSyntax)
@@ -134,7 +159,7 @@ namespace DimonSmart.StringTrimmerGenerator
         {
             Diagnostics.Add(Diagnostic.Create(new DiagnosticDescriptor(
             id: "TRIMMER001",
-            title: "Class contain a private field",
+            title: "Class contain a private property",
             messageFormat: "Class '{0}' contains a private field '{1}'",
             category: "StringTrimmerGenerator",
             defaultSeverity: DiagnosticSeverity.Warning,
