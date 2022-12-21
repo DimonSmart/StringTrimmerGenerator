@@ -5,12 +5,14 @@
         public static void Run()
         {
             var model = new StringTrimmerExampleModel();
+            // All generated methods
+            model.TrimExtraSpaces();
+            model.TrimAll();
+            model.TrimStart();
+            model.TrimEnd();
 
-
-            // DimonSmart.StringTrimmerGeneratorDemo.StringTrimmerExampleModel_StringTrimmerExtension.Tirm(model);
-            model.Trim();
+            // This method is recommended in most cases
+            model.TrimAll();
         }
     }
 }
-
-

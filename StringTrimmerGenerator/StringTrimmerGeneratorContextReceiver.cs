@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using DimonSmart.StringTrimmer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +13,6 @@ namespace DimonSmart.StringTrimmerGenerator
         {
             public string PropertyName { get; set; }
             public string PropertyType { get; set; }
-            public TrimType TrimType { get; set; }
         }
 
         public class ClassDescriptor
@@ -95,7 +92,6 @@ namespace DimonSmart.StringTrimmerGenerator
             {
                 PropertyName = propertyName,
                 PropertyType = propertyType,
-                TrimType = TrimType.All
             };
 
             if (MyProperties.TryGetValue(fullClassName, out var targetClass))

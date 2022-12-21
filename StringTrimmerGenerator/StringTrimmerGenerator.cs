@@ -1,20 +1,25 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace DimonSmart.StringTrimmerGenerator
 {
+
     [Generator]
     public partial class StringTrimmerGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            //    if (!Debugger.IsAttached)
-            //    {
-            //        Debugger.Launch();
-            //    }
+            //if (!Debugger.IsAttached)
+            //{
+            //    Debugger.Launch();
+            //}
 
             context.RegisterForPostInitialization((i) =>
             {
@@ -36,35 +41,58 @@ namespace DimonSmart.StringTrimmerGenerator
             }
 
             var classesToTrim = receiver.MyProperties.Keys.ToArray();
+            var functions = new List<(string fnName, string fn, string comment)> {
+                ("Trim", "Trim()", "Removes all leading and trailing white-space characters from all class string properties" ),
+                ("TrimEnd", "TrimEnd()", "Removes all trailing white-space characters from all class strings properties"),
+                ("TrimStart", "TrimStart()", "Removes all leading white-space characters from all class string properties"),
+                ("TrimExtraSpaces", "TrimExtraSpaces()", "Removes all sequental white-space characters and replace them with only one from all class string properties"),
+                ("TrimAll", "Trim().TrimExtraSpaces()", "Removes all leading and trailing white-space characters as well as any sequential white-space characters from all class string properties and replaces them with only one space.") };
 
-            var sb = new StringBuilder();
-
+            var sb = new TabbedStringBuilder();
+            sb.AppendLine($"using DimonSmart.StringTrimmer;");
             foreach (var cls in receiver.MyProperties.Keys)
             {
                 var classDescriptor = receiver.MyProperties[cls];
+
                 sb.AppendLine($"namespace {receiver.MyProperties[cls].NameSpace}");
                 sb.AppendLine(@"{");
-
-                sb.AppendLine($"public static class {classDescriptor.ClassName}_StringTrimmerExtension");
-                sb.AppendLine(@"{");
-
-                sb.AppendLine($"  public static {classDescriptor.ClassName} Trim(this {classDescriptor.ClassName} classToTrim)");
-                sb.AppendLine("  {");
-                foreach (var prop in receiver.MyProperties[cls].Properties)
+                using (new Indent(sb))
                 {
-                    if (prop.PropertyType != "string" && !classesToTrim.Contains(prop.PropertyType))
+                    sb.AppendLine($"public static class {classDescriptor.ClassName}_StringTrimmerExtension");
+                    sb.AppendLine(@"{");
+
+                    foreach (var (fnName, fn, comment) in functions)
                     {
-                        continue;
+                        using (new Indent(sb))
+                        {
+                            sb.AppendLine($"/// <summary>");
+                            sb.AppendLine($"/// {comment}");
+                            sb.AppendLine($"/// </summary>");
+                            sb.AppendLine($"/// <param name=\"classToTrim\"></param>");
+                            sb.AppendLine($"/// <returns>classToTrim</returns>");
+
+                            sb.AppendLine($"public static {classDescriptor.ClassName} {fnName}(this {classDescriptor.ClassName} classToTrim)");
+                            sb.AppendLine("{");
+                            using (new Indent(sb))
+                            {
+                                foreach (var prop in receiver.MyProperties[cls].Properties)
+                                {
+                                    if (prop.PropertyType != "string" && !classesToTrim.Contains(prop.PropertyType))
+                                    {
+                                        continue;
+                                    }
+
+                                    sb.AppendLine($"classToTrim.{prop.PropertyName} = classToTrim.{prop.PropertyName}.{fn};");
+                                }
+                                sb.AppendLine("return classToTrim;");
+                            }
+                            sb.AppendLine("}");
+                        }
                     }
-
-                    // TODO: Handle options
-                    sb.AppendLine($"    classToTrim.{prop.PropertyName} = classToTrim.{prop.PropertyName}.Trim();");
+                    sb.AppendLine("}");
                 }
-                sb.AppendLine("    return classToTrim;");
-                sb.AppendLine("  }");
-
                 sb.AppendLine("}");
-                sb.AppendLine("}");
+                sb.AppendLine(string.Empty);
             }
 
             context.AddSource("StringTrimmerExtension.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8, SourceHashAlgorithm.Sha256));
@@ -73,42 +101,42 @@ namespace DimonSmart.StringTrimmerGenerator
         public const string StringTrimmerExtensionClassText = @"
 namespace DimonSmart.StringTrimmer
 {
-public static class StringTrimmerExtension
-{
-    public static string RemoveConsecutiveSpaces(this string s)
+    public static class StringTrimmerExtension
     {
-        if (string.IsNullOrEmpty(s))
+        public static string TrimExtraSpaces(this string s)
         {
-            return s;
-        }
-
-        var lenght = s.Length;
-        var characters = s.ToCharArray();
-        int lastChar = 0;
-        var spaceAdded = false;
-        for (int i = 0; i < lenght; i++)
-        {
-            var ch = characters[i];
-
-            if (char.IsWhiteSpace(ch))
+            if (string.IsNullOrEmpty(s))
             {
-                if (spaceAdded)
+                return s;
+            }
+    
+            var lenght = s.Length;
+            var characters = s.ToCharArray();
+            int lastChar = 0;
+            var spaceAdded = false;
+            for (int i = 0; i < lenght; i++)
+            {
+                var ch = characters[i];
+    
+                if (char.IsWhiteSpace(ch))
                 {
-                    continue;
+                    if (spaceAdded)
+                    {
+                        continue;
+                    }
+                    spaceAdded = true;
                 }
-                spaceAdded = true;
+                else
+                {
+                    spaceAdded = false;
+                }
+    
+                characters[lastChar++] = ch;
+    
             }
-            else
-            {
-                spaceAdded = false;
-            }
-
-            characters[lastChar++] = ch;
-
+            return new string(characters, 0, lastChar);
         }
-        return new string(characters, 0, lastChar);
     }
-}
 }
 ";
 
@@ -116,25 +144,12 @@ public static class StringTrimmerExtension
 using System;
 namespace DimonSmart.StringTrimmer
 {
-    [Flags]
-    public enum TrimType
-    {
-        None,
-        Left = 1,
-        Right = 2,
-        LeftAndRignt = Left | Right,
-        Seq = 4,
-        All = LeftAndRignt | Seq,
-    }
-
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     [System.Diagnostics.Conditional(""StringTrimmerGenerator_DEBUG"")]
     sealed class GenerateStringTrimmerAttribute : Attribute
 {
-	TrimType _trimType;
-	public GenerateStringTrimmerAttribute(TrimType trimType = TrimType.All)
+	public GenerateStringTrimmerAttribute()
 	{
-		_trimType = trimType;
 	}
 }
 }
