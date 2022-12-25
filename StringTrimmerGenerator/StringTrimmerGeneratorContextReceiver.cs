@@ -114,10 +114,10 @@ namespace DimonSmart.StringTrimmerGenerator
             Diagnostics.Add(Diagnostic.Create(new DiagnosticDescriptor(
             id: "TRIMMER002",
             title: "Class property isn't fully accessible",
-            messageFormat: "Class '{0}' has unaccessible property '{1}' with '{2}' accessibility as '3'",
+            messageFormat: "Class '{0}' has unaccessible property '{1}' with '{2}' accessibility as '{3}'",
             category: "StringTrimmerGenerator",
             defaultSeverity: DiagnosticSeverity.Warning,
-            isEnabledByDefault: true), Location.None, className, propertyName, methodName, accessibility.ToString()));
+            isEnabledByDefault: true), Location.None, className, propertyName, methodName, Enum.GetName(typeof(Accessibility), accessibility)));
         }
 
         private void VisitClassDeclarationSyntax(GeneratorSyntaxContext syntaxNode, ClassDeclarationSyntax classDeclarationSyntax)
