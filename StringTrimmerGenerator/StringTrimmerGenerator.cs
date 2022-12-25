@@ -46,7 +46,7 @@ namespace DimonSmart.StringTrimmerGenerator
                 ("TrimEnd", "TrimEnd()", "Removes all trailing white-space characters from all class strings properties"),
                 ("TrimStart", "TrimStart()", "Removes all leading white-space characters from all class string properties"),
                 ("TrimExtraSpaces", "TrimExtraSpaces()", "Removes all sequental white-space characters and replace them with only one from all class string properties"),
-                ("TrimAll", "Trim().TrimExtraSpaces()", "Removes all leading and trailing white-space characters as well as any sequential white-space characters from all class string properties and replaces them with only one space.") };
+                ("TrimAll", "Trim()?.TrimExtraSpaces()", "Removes all leading and trailing white-space characters as well as any sequential white-space characters from all class string properties and replaces them with only one space.") };
 
             var sb = new TabbedStringBuilder();
             sb.AppendLine($"using DimonSmart.StringTrimmer;");
@@ -82,7 +82,7 @@ namespace DimonSmart.StringTrimmerGenerator
                                         continue;
                                     }
 
-                                    sb.AppendLine($"classToTrim.{prop.PropertyName} = classToTrim.{prop.PropertyName}.{fn};");
+                                    sb.AppendLine($"classToTrim.{prop.PropertyName} = classToTrim?.{prop.PropertyName}?.{fn};");
                                 }
                                 sb.AppendLine("return classToTrim;");
                             }
@@ -103,6 +103,31 @@ namespace DimonSmart.StringTrimmer
 {
     public static class StringTrimmerExtension
     {
+        public static string Trim(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            return s.Trim();
+        }
+        public static string TrimStart(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            return s.TrimStart();
+        }
+        public static string TrimEnd(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            return s.TrimEnd();
+        }
+
         public static string TrimExtraSpaces(this string s)
         {
             if (string.IsNullOrEmpty(s))
