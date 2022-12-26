@@ -11,21 +11,34 @@ namespace DimonSmart.StringTrimmerGenerator
     {
         public class PropertyTrimDescriptor
         {
+            public PropertyTrimDescriptor(string propertyName, string propertyType)
+            {
+                PropertyName = propertyName;
+                PropertyType = propertyType;
+            }
+
             public string PropertyName { get; set; }
             public string PropertyType { get; set; }
         }
 
         public class ClassDescriptor
         {
+            public ClassDescriptor(string className, string fullClassName, List<PropertyTrimDescriptor> properties)
+            {
+                ClassName = className;
+                FullClassName = fullClassName;
+                Properties = properties;
+            }
+
             public string NameSpace { get { return string.Join(".", FullClassName.Split('.').Reverse().Skip(1).Reverse()); } }
             public string ClassName { get; set; }
             public string FullClassName { get; set; }
-            public List<PropertyTrimDescriptor> Properties { get; set; } = new List<PropertyTrimDescriptor>();
+            public List<PropertyTrimDescriptor> Properties { get; set; }
         }
 
         public Dictionary<string, ClassDescriptor> MyProperties = new();
         public List<Diagnostic> Diagnostics = new();
-        private ClassDeclarationSyntax CurrentClass = null;
+        private ClassDeclarationSyntax? CurrentClass = null;
         private const string GenerateStringTrimmerAttributeFullName = "DimonSmart.StringTrimmer.GenerateStringTrimmerAttribute";
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext syntaxNode)
@@ -55,11 +68,11 @@ namespace DimonSmart.StringTrimmerGenerator
             var propertyName = propertyDeclarationSyntax.Identifier.ValueText;
             var propertyType = syntaxNode
                 .SemanticModel
-                .GetDeclaredSymbol(propertyDeclarationSyntax)
+                .GetDeclaredSymbol(propertyDeclarationSyntax)!
                 .Type.ToDisplayString();
             var propertyAccessibility = syntaxNode
                 .SemanticModel
-                .GetDeclaredSymbol(propertyDeclarationSyntax)
+                .GetDeclaredSymbol(propertyDeclarationSyntax)!
                 .DeclaredAccessibility;
 
             if (propertyAccessibility != Accessibility.Public && propertyAccessibility != Accessibility.Internal)
@@ -75,24 +88,20 @@ namespace DimonSmart.StringTrimmerGenerator
                     return;
                 }
 
-                if ((propertySymbol.GetMethod.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
+                if ((propertySymbol.GetMethod!.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
                 {
                     ReportUnaccessibleMethod(className, propertyName, "get", propertySymbol.GetMethod.DeclaredAccessibility);
                     return;
                 }
 
-                if ((propertySymbol.SetMethod.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
+                if ((propertySymbol.SetMethod!.DeclaredAccessibility & (Accessibility.Public | Accessibility.Internal)) == 0)
                 {
                     ReportUnaccessibleMethod(className, propertyName, "set", propertySymbol.SetMethod.DeclaredAccessibility);
                     return;
                 }
             }
 
-            var propertyDescriptor = new PropertyTrimDescriptor
-            {
-                PropertyName = propertyName,
-                PropertyType = propertyType,
-            };
+            var propertyDescriptor = new PropertyTrimDescriptor(propertyName, propertyType);
 
             if (MyProperties.TryGetValue(fullClassName, out var targetClass))
             {
@@ -100,12 +109,11 @@ namespace DimonSmart.StringTrimmerGenerator
             }
             else
             {
-                MyProperties.Add(fullClassName, new ClassDescriptor
-                {
-                    ClassName = className,
-                    FullClassName = fullClassName,
-                    Properties = new List<PropertyTrimDescriptor> { propertyDescriptor }
-                });
+                MyProperties.Add(fullClassName,
+                    new ClassDescriptor(
+                        className,
+                        fullClassName,
+                        new List<PropertyTrimDescriptor> { propertyDescriptor }));
             }
         }
 
@@ -134,9 +142,9 @@ namespace DimonSmart.StringTrimmerGenerator
             var markerAttributes =
                syntaxNode
                .SemanticModel
-               .GetDeclaredSymbol(classDeclarationSyntax)
+               .GetDeclaredSymbol(classDeclarationSyntax)!
                .GetAttributes()
-               .Where(i => i.AttributeClass.OriginalDefinition.ToDisplayString() == GenerateStringTrimmerAttributeFullName)
+               .Where(i => i.AttributeClass!.OriginalDefinition.ToDisplayString() == GenerateStringTrimmerAttributeFullName)
                .ToList();
 
             if (markerAttributes.Any())
@@ -164,7 +172,7 @@ namespace DimonSmart.StringTrimmerGenerator
 
         private static string GetFullClassName(ClassDeclarationSyntax varClassDec)
         {
-            SyntaxNode tempCurCls = varClassDec;
+            SyntaxNode? tempCurCls = varClassDec;
             var tempFullName = new Stack<string>();
 
             do
