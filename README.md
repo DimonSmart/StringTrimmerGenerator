@@ -1,4 +1,4 @@
-🚧 Work In Progress 
+String Trimmer Generator - trim all class string propertines at once!
 ========
 
 I'd love to have a quick and easy way to clean up user input, such cutting whitespace from the beginning and end of strings. In addition, I'd like to remove space sequences from within strings (optionally). The StringTrimmer software does this flawlessly with just one speed restriction. Many users choose to manually sanitize user input or perhaps not to sanitize it at all because reflection slows it down. As a result, numerous people have email addresses and user names that are nearly identical. And as a result, there are "duplicate" users with inconsistent access privileges, duplicate records in the database, and trim and distinct functions all over the place in the codebase. Deterioration of overall performance, demotivation of developers, and several other issues are the outcome.
