@@ -4,6 +4,23 @@
     <LangVersion>10.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>true</IncludeBuildOutput>
+	<Nullable>enable</Nullable>
+    <PackageId>DimonSmart.StringTrimmerGenerator</PackageId>
+	<Version>1.0.0</Version>
+	<Authors>Dmitry Dorogoy</Authors>
+	<Company>DimonSmart</Company>
+	<PackageReadmeFile>readme.md</PackageReadmeFile>
+	<RootNamespace>DimonSmart.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	<PackageTags>String;Trim;ExtraSpaces</PackageTags>
+	<Description>Build time generation for trim all class strings. No more "Duplicate" data (with only extra space difference). Keep you database clean and consistent! Fully free license!</Description>
+	<RepositoryUrl>https://github.com/DimonSmart/StringTrimmerGenerator</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageLicenseExpression>0BSD</PackageLicenseExpression>
+	<Title>String Trimmer Generator</Title>
+	<Copyright>FREE</Copyright>
+	<PackageProjectUrl>https://github.com/DimonSmart/StringTrimmerGenerator</PackageProjectUrl>
+	<PackageIcon>StringTrimmerGenerator.png</PackageIcon>
+	<PackageIconUrl>https://i.imgur.com/eCuNbvv.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,35 +29,21 @@
   </ItemGroup>
 
 
-	<ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" PrivateAssets="all" />
-
-<!--
-    <PackageReference
-        Include="Microsoft.CodeAnalysis.NetAnalyzers"
-        Version="7.0.0"
-        PrivateAssets="all" />
--->
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
-
-    <!--<PackageReference Include="System.Text.Json" Version="7.0.0" />-->
   </ItemGroup>
 
-	<PropertyGroup>
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>
-			$(BaseIntermediateOutputPath)\GeneratedFiles
-		</CompilerGeneratedFilesOutputPath>
-	</PropertyGroup>
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>
+        $(BaseIntermediateOutputPath)\GeneratedFiles
+    </CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
 	
-	<!--<Target Name="GetDependencyTargetPaths">
-		<ItemGroup>
-			<TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" IncludeRuntimeDependency="false" />
-		</ItemGroup>
-	</Target>-->
-
-
-	
-	
+  <ItemGroup>
+    <None Include="docs\readme.md" Pack="true" PackagePath="\" />
+    <None Include="..\StringTrimmerGenerator\StringTrimmerGenerator.png" Pack="True" Visible="false" PackagePath="\" />
+  </ItemGroup>
 	
 </Project>
