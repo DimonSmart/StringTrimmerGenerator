@@ -9,6 +9,7 @@ namespace DimonSmart.StringTrimmerGeneratorDemo
             // Run the various scenarios
             Console.WriteLine("Running UseStringTrimmerGenerator:\n");
             UseStringTrimmerGenerator.Run();
+            model.TrimAll();
         }
     }
 }
