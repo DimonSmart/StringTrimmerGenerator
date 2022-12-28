@@ -133,9 +133,7 @@ namespace DimonSmart.StringTrimmerGenerator
             var generateStringTrimmerAttribute = syntaxNode
                 .SemanticModel
                 .Compilation
-                //.GetTypeByMetadataName(typeof(GenerateStringTrimmerAttribute).FullName);
                 .GetTypeByMetadataName("DimonSmart.StringTrimmer.GenerateStringTrimmerAttribute");
-
 
             CurrentClass = classDeclarationSyntax;
 
