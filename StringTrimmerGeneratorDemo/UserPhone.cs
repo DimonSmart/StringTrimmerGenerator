@@ -1,6 +1,4 @@
 ﻿using DimonSmart.StringTrimmer;
-using System.Numerics;
-using System.Xml.Linq;
 
 namespace DimonSmart.StringTrimmerGeneratorDemo
 {
@@ -14,9 +12,3 @@ namespace DimonSmart.StringTrimmerGeneratorDemo
         public override string ToString() => $"PhoneNumber:'{PhoneNumber}', Comment:'{Comment}', Tags:'{Tags}'";
     }
 }
-
-
-
-
-
-

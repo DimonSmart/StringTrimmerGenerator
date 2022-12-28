@@ -15,9 +15,3 @@ namespace DimonSmart.StringTrimmerGeneratorDemo
         public override string ToString() => $"Name:'{Name}', Surname:'{Surname}', Nickname:'{Nickname}',{Environment.NewLine}Phone:'{Phone}'";
     }
 }
-
-
-
-
-
-

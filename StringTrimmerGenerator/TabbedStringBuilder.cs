@@ -8,10 +8,10 @@ namespace DimonSmart.StringTrimmerGenerator
         public int Indent { get; set; }
 
         /// <summary>
-        /// 
+        /// Add line to the stringbuilder with Indent
         /// </summary>
         /// <param name="text"></param>
-        /// <returns></returns>
+        /// <returns>Self</returns>
         public TabbedStringBuilder AppendLine(string text)
         {
             _stringBuilder.Append(new string(' ', Indent));
@@ -23,6 +23,5 @@ namespace DimonSmart.StringTrimmerGenerator
         {
             return _stringBuilder.ToString();
         }
-
     }
 }
