@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -12,14 +10,17 @@ namespace DimonSmart.StringTrimmerGenerator
 {
 
     [Generator]
-    public partial class StringTrimmerGenerator : ISourceGenerator
+    public partial class StringTrimmerGenerator : 
+        ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            //if (!Debugger.IsAttached)
-            //{
-            //    Debugger.Launch();
-            //}
+            #region DebuggerLauncher
+            // if (!Debugger.IsAttached)
+            // {
+            //     Debugger.Launch();
+            // }
+            #endregion
 
             context.RegisterForPostInitialization((i) =>
             {
@@ -27,7 +28,8 @@ namespace DimonSmart.StringTrimmerGenerator
                 i.AddSource("StringTrimmerExtensionClass.g.cs", StringTrimmerExtensionClassText);
             });
 
-            context.RegisterForSyntaxNotifications(() => new StringTrimmerGeneratorContextReceiver());
+            context.RegisterForSyntaxNotifications(
+                () => new StringTrimmerGeneratorContextReceiver());
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -173,9 +175,9 @@ namespace DimonSmart.StringTrimmer
     [System.Diagnostics.Conditional(""StringTrimmerGenerator_DEBUG"")]
     sealed class GenerateStringTrimmerAttribute : Attribute
 {
-	public GenerateStringTrimmerAttribute()
-	{
-	}
+    public GenerateStringTrimmerAttribute()
+    {
+    }
 }
 }
 ";
