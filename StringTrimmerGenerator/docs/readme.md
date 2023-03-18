@@ -1,47 +1,59 @@
 # StringTrimmerGenerator
 Don't ever rely on user input!
-This package offers the ability to trim every string in a class.
+This package offers the ability to trim all class strings at once.
 Sanitizing input data before processing is beneficial.
 
-NOTE1: There is a StringTrimmer package with provide similar functionality
-The difference is:
-* StringTrimmer - reflection based
-* StringTrimmerGenerator - use Source Generator to provide best performance
 
-NOTE2: StringTrimmerGenerator support trim operation over all public strings
-and public class properties for classes marked with [GenerateStringTrimmer] attribute
-
-# Problem statement
-Standard class for describing a user.
+# Usage example
+Typical request for user creation
 ```csharp
-public class User
+[GenerateStringTrimmer]
+public class CreateUserRequest
 {
-   public string Name {get; set;}
-   public string Surname {get; set;}
-   public string Secondname {get; set;}
-   public string UserName {get; set;}
-   public string Email {get; set;}
-   public string Phone {get; set;}
+    public string Name { get; set; }
+    public string Surname { get; set; }
+    public string Nickname { get; set; }
+    public UserPhone Phone { get; set; }
+}
+
+[GenerateStringTrimmer]
+public class UserPhone
+{
+    public string PhoneNumber { get; set; }
+    public string Comment { get; set; }
+    public string Tags { get; set; }
+    public override string ToString() => $"PhoneNumber:'{PhoneNumber}', Comment:'{Comment}', Tags:'{Tags}'";
 }
 ```
 
-Usage of the User class to add a new User record to the database is typical.
-## Can you find an error?
-```csharp
-Try 
-public void CreateUser (User user)
+## Fields trimming Before this nuget
+```csharp 
+public void CreateUser (CreateUserRequest request)
 {
-   user.Name = user.Name.Trim();
-   user.Surname = user.Surname.Trim();
-   user.Secondname = user.Secondname.Trim();
-   user.Email = user.Email.Trim();
-   user.Phone = user.Phone.Trim();
+   request.Name = request.Name.Trim();
+   request.Surname = request.Surname.Trim();
+   request.NickName = request.NickName.Trim();
+   request.Phone.PhoneNumber = request.Phone.PhoneNumber.Trim();
+   request.Phone.Comment = request.Phone.Comment.Trim();
+   request.Phone.Tags = request.Phone.Tags.Trim();
+   // Send to db logic
 }
 ```
 
-Error: UserName Trim command is missing.
-Due to the tiny difference in UserName, this allows for many users while having only one real user.
+## Fields trimming WITH this nuget
+```csharp 
+public void CreateUser (CreateUserRequest request)
+{
+   request.TrimAll();
+   // Send to db logic
+}
+```
 
+## Why is trimming user import is important?
+Imaging you simply forgot trimming the UserName field
+and send exa ctly the same users to the database many times.
+
+As a result you have user(s)
 * "John Doe "
 * " John Doe"
 * " John Doe "
@@ -49,15 +61,15 @@ Due to the tiny difference in UserName, this allows for many users while having 
 
 Having the same user registered many times irritates the support personnel!
 
-Note: It is usual for users to not merely input a UserName during registration, but to copy it from other sources with different spaces surrounding (and inside) the name.
+Note: It is usual for users to not merely input a UserName during
+registration, but to copy it from other sources with different
+spaces surrounding (and inside) the name.
 
+Note: There is a StringTrimmer package with provide similar functionality
+The difference is:
+* StringTrimmer - reflection based.
+* StringTrimmerGenerator - use Source Generator to provide best performance
 
-# Magic bullet! (Usage example)
-```csharp
-Try 
-public void CreateUser (CreateUserRequest request)
-{
-   request.TrimAll(); // Just one line
-}
-```
+Note: Visual studio have well known "bug" while using the source generators.
+So you have to reopen the solution after adding source generator nuget package.
 
